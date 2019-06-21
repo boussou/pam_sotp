@@ -1,0 +1,50 @@
+# /******************************************************************************
+#  * pam_sotp: Simple One Time Password support for PAM                         *
+#  *                                                                            *
+#  * This program is free software; you can redistribute it and/or modify       *
+#  * it under the terms of the GNU General Public License version 2,            *
+#  * as published by the Free Software Foundation.                              *
+#  *                                                                            *
+#  * This program is distributed in the hope that it will be useful,            *
+#  * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+#  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+#  * GNU General Public License for more details.                               *
+#  *                                                                            *
+#  * You should have received a copy of the GNU General Public License          *
+#  * along with this program; if not, write to the Free Software                *
+#  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA  *
+#  *                                                                            *
+#  ******************************************************************************/
+.PHONY:	dummy
+
+
+
+
+###############################################################################
+# Build rules
+
+all:
+	@# DON'T put a for in the build rules, make doesn't stop on errors!!!!
+	@make -C libsotp
+	@make -C pam
+	@make -C utils
+
+###############################################################################
+# Additional rules
+clean:	dummy
+	@make -C libsotp $@
+	@make -C pam $@
+	@make -C utils $@
+
+tidy:	dummy
+	@make -C libsotp $@
+	@make -C pam $@
+	@make -C utils $@
+	@rm -f *~
+
+distclean:	tidy clean
+	@make -C libsotp $@
+	@make -C pam $@
+	@make -C utils $@
+	@rm -f -f Makefile
+	@rm -f -f config.h

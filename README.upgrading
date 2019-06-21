@@ -1,0 +1,11 @@
+Starting from version 0.3 pam_sotp uses a new database format. This
+format is designed to be portable and architecture-independent. This
+means that you will be able to transfer auth databases from one host to
+another without any problems.
+
+Unfortunately this also means that upgrading from the 0.2.x db is not
+possible, so you will have to delete all the previous databases and
+recreate them.
+
+Any database created with pam_sotp version >= 0.3.0 should be          
+compatible with the current release

@@ -1,0 +1,2 @@
+# Authentication for otppasswd. The default is the unix password
+auth	required	pam_unix.so 

@@ -1,0 +1,42 @@
+<sect1><title>Introduction</title>
+
+<para>
+pam_sotp provides simple one time password support to PAM, the
+pluggable authentication modules. This module only provides PAM auth services 
+</para>
+
+<sect2><title>Usage scenario</title>
+<para>
+The user is provided with a list of one time passwords. each time the
+user wants to authenticate against an sotp-enabled service he or she will
+be asked to enter an specific password of the list. in case of successful 
+authentication that password will become invalid or valid only for a configured period
+of time (depending on how the service was configured) and the service will ask for a different
+password next time.
+</para>
+
+<para>
+This list of one time passwords (OTP list) is typically stored in print
+form and stored in the user's wallet or in electronic form in the user's PDA or
+cell phone.
+</para>
+
+<para>
+Optionally passwords can be configured with a 'prefix', which
+is another password which the user has to memorize and which has to
+be written as a prefix of the requested one time password. The prefix
+acts as a security measure in case that the OTP list is lost or stolen
+from the user.
+</para>
+
+<para>
+The system administrator can configure a service in such a way
+that entered passwords are valid for a configured period of time. This feature, which we
+will call password lifespan, is useful when the application requesting the authentication 
+will have to authenticate several more times in a period of time (for example, a webmail application
+authenticating against the IMAP server).
+</para>
+
+</sect2>
+
+</sect1>

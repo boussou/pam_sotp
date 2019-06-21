@@ -1,0 +1,180 @@
+
+<sect1><title>Configuration</title>
+
+<sect2><title>Creating a new authentication database</title>
+
+<para>
+pam_sotp stores authentication information in <emphasis>authentication databases</emphasis>. Each authentication 
+database contains the information used to authenticate one user. Authentication databases are grouped into authentication
+directories. Each pam_sotp-enabled PAM service will authenticate against an authentication directory (by default 
+<literal>/etc/sotp</literal>, but this can be changed for each service). If the user to be authenticated doesn't 
+have an authentication database under the inspected authentication directory, pam_sotp refuses to authenticate
+him/her, giving control back to the PAM module stack.
+</para>
+
+<para>
+The support utilities for pam_sotp have been merged into one utility: <Command>otppasswd</Command>. Once you
+have installed pam_sotp all you have to do to create a new authentication databasefor your user is to run the 
+<Command>otppasswd</Command>
+command. <Command>otppasswd</Command> usage is straightforward:
+
+<Synopsis>
+$ otppasswd -h
+otppasswd v.0.3.3  (C) 2004 Pedro Diaz (sotp@cavecanen.org)
+
+Usage: otppasswd [OPTIONS]
+
+Available options:
+
+  -o file           File used to store the OTP list
+  -n number         Number of passwords to generate (default: 20)
+  -p prefix         Prefix to add in each generated password (default: No prefix)
+  -l length         Length of each generated password (default: 5)
+  -t lifespan       Built-in password lifespan, in seconds (default: 0)
+  -e days           Make the auth database expire in x days (default: don't expire)
+  -c charset        Charset used when generating passwords (default: 0123456789)
+  -d authdir        Authentication directory (default: /etc/sotp/)
+  -P                Pretty-print the OTP list
+  -D                Disable the auth database
+  -E                Enable the auth database
+  -h                Show this help message
+</Synopsis>
+</para>
+
+<para>
+If the options <command>-D</command> or <command>-E</command> are not specified, <command>otppasswd</command> will 
+create a new authentication database overwriting  any previous database that the user might have in the
+authentication directory. This means that you can use <command>otppasswd</command> to generate a new
+OTP list when you are near to run out of passwords. Keep in mind that since <command>otppasswd</command>
+overwrites the previous database your previous OTP list won't be valid anymore.
+</para>
+
+<para>
+The option <command>-D</command> disables an existing authentication database. The authentication data will still be
+there but pam_sotp will refuse to use it. The option <command>-E</command> enables a previously disabled database.
+</para>
+</sect2>
+
+
+
+<sect2><title>Configuring the pam_sotp module</title>
+
+<para>
+The <literal>pam_sotp.so</literal> module accepts the following options:
+</para>
+
+<itemizedlist mark=opencircle>
+
+<listitem><para>
+<Literal>auth_dir=<Replaceable>path</Replaceable></Literal>  Path to the SOTP authentication directory. If not specified the default
+(specified with the <command>configure</command> script when pam_sotp was compiled, or <literal>/etc/sotp</literal> if none
+was specified) will be used
+</para></listitem>
+
+
+<listitem><para>
+<literal>fail_delay=<Replaceable>nsecs</Replaceable></literal> Plan a delay of at least <Replaceable>nsecs</Replaceable> seconds after a 
+failed authentication. The actual number of seconds of waiting depends on PAM and the module stack. The default for this option
+is zero seconds.
+</para></listitem>
+
+
+<listitem><para>
+<literal>prompt_number=<replaceable>&lt;yes|no&gt;</replaceable></literal> Include the password number in the prompt. The default
+for this option is to include the password number in the prompt.
+</para></listitem>
+
+
+<listitem><para>
+<literal>pw_lifespan=<replaceable>nsecs</replaceable></literal> Set the password lifespan value for this service. The default
+for this option is cero seconds.
+</para></listitem>
+</itemizedlist>
+
+<sect3><title>Example</title>
+<para>
+We want to configure the login service with SOTP support. We
+also want to let in other non-SOTP users. SOTP users must also be able to
+log-in with their regular password.
+</para>
+
+<para>
+The file <literal>/etc/pam.d/login</literal> will look something like this:
+<Synopsis>
+auth sufficient pam_sotp.so prompt_number=yes 
+account required        pam_unix.so
+</Synopsis>
+</para>
+
+<para>
+SOTP users (the ones with an auth database in <literal>/etc/sotp</literal>) will be asked
+for an OTP. If the OTP is wrong they will be asked for their regular
+password:
+<screen>
+	odiel:~# telnet localhost
+	Trying 127.0.0.1...
+	Connected to localhost.localdomain.
+	Escape character is '^]'.
+	Debian GNU/Linux 3.1 odiel
+	odiel login: susan
+
+	One time password [01]: <co id="otppasswd">
+	Password:
+</screen>
+
+<calloutlist>
+
+<callout arearefs="otppasswd">
+<para>The wrong OTP was introduced</para>
+</callout>
+
+</calloutlist>
+</para>
+
+<para>
+Non-SOTP users won't notice difference:
+<screen>
+	odiel:~# telnet localhost
+	Trying 127.0.0.1...
+
+	Connected to localhost.localdomain.
+	Escape character is '^]'.
+	Debian GNU/Linux 3.1 odiel
+	odiel login: pdiaz
+	Password:
+</screen>
+</para>
+</sect3>
+</sect2>
+
+
+<sect2><title>Other issues</title>
+
+<sect3><title>Password lifespan</title>
+
+<para>
+With the options <literal>pw_lifespan</literal> in the module configuration and
+<literal>-t </literal> in <command>otppasswd</command>
+ you can configure pam_sotp to authenticate a service with 
+<emphasis>limited time passwords</emphasis>. This basically means that pam_sotp will handle authentication in the
+same way as before but with the following additional feature: an used password will remain valid for some time 
+after its first use. Of course, the prompted password will be also valid.
+</para>
+
+<para>
+The actual amount of time an older password will remain valid is calculated as the minimum of the value specified in 
+<literal>/etc/pam.d/service</literal> configuration file and the value specified with <Command>otppasswd</Command> 
+when the user database was created.
+This means that specifying a value of zero in either of these places will disable password lifespan for that pam service or
+authentication database.
+</para>
+
+<para>
+Limited Time Passwords are useful for using pam_sotp with software that requires several authentications against a service
+in a short period of time, such as some webmail systems (<ulink url="http://www.squirrelmail.org/">Squirrelmail</ulink> 
+has this behavior).
+</para>
+
+</sect3>
+</sect2>
+</sect1>

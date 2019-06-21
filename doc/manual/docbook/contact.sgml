@@ -1,0 +1,22 @@
+<sect1><title>Disclaimer, contact information, etc...</title>
+<para>
+pam_sotp is <emphasis>not</emphasis> yet ready
+for production use. This is alpha-quality code, it may be full of remote
+holes (I hope not ;-). Having said that, I've been using pam_sotp for
+accessing my webmail for some time and I didn't found any problems.
+</para>
+
+<para>
+This is my first PAM module. I've done my best to comply with the
+standards recommended by the PAM Module Writers' Manual. If you have
+experience writing PAM modules and you have any suggestions about the
+code, please contact me!
+</para>
+
+<para>
+Suggestions, patches and code contributions can be directed to
+<email>sotp (AT) cavecanen.org</email>. They will be very welcome.
+</para>
+
+
+</sect1>

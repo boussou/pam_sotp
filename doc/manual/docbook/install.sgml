@@ -1,0 +1,45 @@
+<sect1><title>Installing pam_sotp</title>
+
+<para>
+Starting with version 0.2 pam_sotp has a autoconf-style build system. This means
+that you should be able to compile & install pam_sotp with the commands:
+
+<Synopsis>
+	./configure
+	make
+	make install
+</Synopsis>
+</para>
+
+<para>
+As well as the usual arguments (<literal>--prefix</literal>, etc..) the  <command>configure</command> scripts accepts 
+the following pam_sotp specific arguments:
+
+<itemizedlist mark=opencircle>
+<listitem><para>
+<literal>--with-randondev</literal> Device used to gather random data. The default is <literal>/dev/random</literal>. You might
+want to use the pseudorandom generator <literal>/dev/urandom</literal> instead; password generation will be much faster at the 
+cost of less (cryptographically) strong passwords.
+If the
+device given does not exists or is not a character device, glibc's <function>random()</function> will be used instead. 
+</para></listitem>
+
+<listitem><para>
+<literal>--with-authdir</literal> Default authentication directory. If not given, <literal>/etc/sotp</literal> will be used
+</para></listitem>
+
+<listitem><para>
+<literal>--enable-debug</literal> Verbose logging with syslog
+</para></listitem>
+
+</itemizedlist>
+
+<para>
+pam_sotp requires a <literal>shadow</literal> system group to work. This group will own all the authentication
+databases and directories in the system. Most linux installations already have this group, so you don't have to worry
+about this. If you don't have a <literal>shadow</literal> group, (<literal>configure</literal> script will complain about
+it) try to create it by hand. Also contact me so I can figure out some fix for the next release.
+</para>
+
+
+</sect1>

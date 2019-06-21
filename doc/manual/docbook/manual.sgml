@@ -1,0 +1,17 @@
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V3.1//EN" [
+<!ENTITY intro SYSTEM "intro.sgml">
+<!ENTITY install SYSTEM "install.sgml">
+<!ENTITY config SYSTEM "config.sgml">
+<!ENTITY contact SYSTEM "contact.sgml">
+]>
+
+<article>
+<artheader>
+	<title>pam_sotp 0.3.3 manual</title>
+	<author><firstname>Pedro</firstname><surname>Diaz &lt;sotp (AT) cavecanen.org&gt;</surname></author>
+</artheader>
+
+&intro;
+&install;
+&config;
+&contact;

@@ -1,0 +1,12 @@
+pam_sotp was started by Pedro Diaz <sotp@cavecanen.org>, who is the lead
+developer and current maintainer of the project. A number of people
+have/are contributed/contributing to pam_sotp:
+
+ - Jose Luis Tallon <projects+sotp@adv-solutions.net> has contributed
+ with a lot of great ideas, and more important: has pointed out some
+ really bad ideas on some of my designs ;-)
+
+ - Christophe Devine <c.devine@cr0.net> is the author of a very nice
+ GPL implementation of the SHA-1 algorithm which is used in pam_sotp
+ (http://www.cr0.net:8040/code/crypto/sha1/).
+

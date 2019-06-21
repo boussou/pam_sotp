@@ -1,0 +1,43 @@
+pam_sotp 0.3.3 2004-12-08
+-------------------------
+	- Added disable and enable commands to otppasswd
+	- Bugfix: SGID shadow applications could not authenticate against
+	  pam_sotp (some SUID code somehow remained in pam_sotp)
+
+pam_sotp 0.3.2 2004-11-16
+-------------------------
+	- Bugfix (important): pam_sotp did not work unless the option pw_lifespan was
+	specified in the PAM service configuration file
+	- Some improvements to the documentation
+
+pam_sotp 0.3.1 2004-11-15
+-------------------------
+	- Bugfix: creating an auth db as root did not work
+	- Documentation now in docbook
+	- More error checking
+	- Now pam_sotp doesn't ask for a password if the database is exhausted (no
+	new passwords left) and all older passwords have expired
+	- Added support for static PAM modules
+	- improved otppasswd error messages and password handling
+
+pam_sotp 0.3.0 2004-11-09
+-------------------------
+	- Auth database redesigned: Now it should be platform-independent
+	- Several code reforms. A library with the OTP functionality is now provided
+	- Improved LTP support. 
+	- Dropped SUID root for SGID shadow in otppasswd
+	- Changed hashing algorithm from MD5 to SHA-1
+	- Dropped PAM passwd feature support. pam_sotp only provides auth now
+
+pam_sotp 0.2.0  2004-10-15
+--------------------------
+	- Some bugfixes
+	- Support for Limited Time Passwords
+	- New options: fail_delay, pw_lifespan (see doc)
+	- autoconf build system
+	- Converted documentation to HTML
+	- Initial syslog support 
+	
+pam_sotp 0.1.0 2004-10-09
+-------------------------
+	- Initial release

@@ -1,0 +1,74 @@
+# /******************************************************************************
+#  * pam_sotp: Simple One Time Password support for PAM                         *
+#  *                                                                            *
+#  *                                                                            *
+#  * This program is free software; you can redistribute it and/or modify       *
+#  * it under the terms of the GNU General Public License version 2,            *
+#  * as published by the Free Software Foundation.                              *
+#  *                                                                            *
+#  * This program is distributed in the hope that it will be useful,            *
+#  * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+#  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+#  * GNU General Public License for more details.                               *
+#  *                                                                            *
+#  * You should have received a copy of the GNU General Public License          *
+#  * along with this program; if not, write to the Free Software                *
+#  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA  *
+#  *                                                                            *
+#  ******************************************************************************/
+# 
+# Handmade Makefile: I could get through the autoconf manual in one afternoon, 
+# but there is no way I'm reading the automake & libtool manual in the 
+# same afternoon ;-)
+#
+.PHONY:	dummy
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+sbindir=@sbindir@
+host=@HOST@
+bindir=@bindir@
+pam_moduledir=@PAM_MODULEDIR@
+pam_configdir=@PAM_CONFIGDIR@
+
+
+
+all:	build
+
+
+build:
+	make -C src
+
+install:	build
+	# PAM module
+	install -m 755 src/pam/pam_sotp.so ${DESTDIR}$(pam_moduledir)
+
+	# OTPpasswd utility
+	install -m 2755 -o root -g shadow src/utils/otppasswd ${DESTDIR}$(bindir)
+
+	# conf. files & directory
+	install -d -m 770 -o root -g shadow /etc/sotp	
+	install -m 640 -o root -g shadow etc/pam.d/otppasswd ${DESTDIR}$(pam_configdir)
+
+uninstall:
+	rm -f $(DESTDIR)$(pam_configdir)/otppasswd
+	rm -f $(DESTDIR)$(pam_moduledir)/pam_sotp.so 
+	rm -f $(DESTDIR)$(sbindir)/genotpdb 
+	rm -f $(DESTDIR)$(bindir)/otppasswd
+
+clean:	dummy
+	make -C src clean
+
+
+distclean:	clean
+	make -C src distclean
+	rm -f config.log configure.sub configure.cache 
+	rm -Rf autom4te.cache
+	rm -f config.status
+	rm -f Makefile
+	
+
+
+maintainer-clean:	distclean
+	rm -f configure

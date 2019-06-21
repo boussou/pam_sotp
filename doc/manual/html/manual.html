@@ -1,0 +1,608 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>pam_sotp 0.3.3 manual</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"></HEAD
+><BODY
+CLASS="ARTICLE"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="ARTICLE"
+><DIV
+CLASS="TITLEPAGE"
+><H1
+CLASS="TITLE"
+><A
+NAME="AEN2"
+>pam_sotp 0.3.3 manual</A
+></H1
+><H3
+CLASS="AUTHOR"
+><A
+NAME="AEN4"
+>Pedro Diaz &#60;sotp (AT) cavecanen.org&#62;</A
+></H3
+><HR></DIV
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+>1. <A
+HREF="#AEN7"
+>Introduction</A
+></DT
+><DD
+><DL
+><DT
+>1.1. <A
+HREF="#AEN10"
+>Usage scenario</A
+></DT
+></DL
+></DD
+><DT
+>2. <A
+HREF="#AEN16"
+>Installing pam_sotp</A
+></DT
+><DT
+>3. <A
+HREF="#AEN41"
+>Configuration</A
+></DT
+><DD
+><DL
+><DT
+>3.1. <A
+HREF="#AEN43"
+>Creating a new authentication database</A
+></DT
+><DT
+>3.2. <A
+HREF="#AEN62"
+>Configuring the pam_sotp module</A
+></DT
+><DD
+><DL
+><DT
+>3.2.1. <A
+HREF="#AEN86"
+>Example</A
+></DT
+></DL
+></DD
+><DT
+>3.3. <A
+HREF="#AEN101"
+>Other issues</A
+></DT
+><DD
+><DL
+><DT
+>3.3.1. <A
+HREF="#AEN103"
+>Password lifespan</A
+></DT
+></DL
+></DD
+></DL
+></DD
+><DT
+>4. <A
+HREF="#AEN115"
+>Disclaimer, contact information, etc...</A
+></DT
+></DL
+></DIV
+><DIV
+CLASS="SECT1"
+><H2
+CLASS="SECT1"
+><A
+NAME="AEN7"
+>1. Introduction</A
+></H2
+><P
+>pam_sotp provides simple one time password support to PAM, the
+pluggable authentication modules. This module only provides PAM auth services </P
+><DIV
+CLASS="SECT2"
+><HR><H3
+CLASS="SECT2"
+><A
+NAME="AEN10"
+>1.1. Usage scenario</A
+></H3
+><P
+>The user is provided with a list of one time passwords. each time the
+user wants to authenticate against an sotp-enabled service he or she will
+be asked to enter an specific password of the list. in case of successful 
+authentication that password will become invalid or valid only for a configured period
+of time (depending on how the service was configured) and the service will ask for a different
+password next time.</P
+><P
+>This list of one time passwords (OTP list) is typically stored in print
+form and stored in the user's wallet or in electronic form in the user's PDA or
+cell phone.</P
+><P
+>Optionally passwords can be configured with a 'prefix', which
+is another password which the user has to memorize and which has to
+be written as a prefix of the requested one time password. The prefix
+acts as a security measure in case that the OTP list is lost or stolen
+from the user.</P
+><P
+>The system administrator can configure a service in such a way
+that entered passwords are valid for a configured period of time. This feature, which we
+will call password lifespan, is useful when the application requesting the authentication 
+will have to authenticate several more times in a period of time (for example, a webmail application
+authenticating against the IMAP server).</P
+></DIV
+></DIV
+><DIV
+CLASS="SECT1"
+><HR><H2
+CLASS="SECT1"
+><A
+NAME="AEN16"
+>2. Installing pam_sotp</A
+></H2
+><P
+>Starting with version 0.2 pam_sotp has a autoconf-style build system. This means
+that you should be able to compile &#38; install pam_sotp with the commands:
+
+<PRE
+CLASS="SYNOPSIS"
+>	./configure
+	make
+	make install</PRE
+></P
+><P
+>As well as the usual arguments (<TT
+CLASS="LITERAL"
+>--prefix</TT
+>, etc..) the  <B
+CLASS="COMMAND"
+>configure</B
+> scripts accepts 
+the following pam_sotp specific arguments:
+
+<P
+></P
+><UL
+><LI
+STYLE="list-style-type: opencircle"
+><P
+><TT
+CLASS="LITERAL"
+>--with-randondev</TT
+> Device used to gather random data. The default is <TT
+CLASS="LITERAL"
+>/dev/random</TT
+>. You might
+want to use the pseudorandom generator <TT
+CLASS="LITERAL"
+>/dev/urandom</TT
+> instead; password generation will be much faster at the 
+cost of less (cryptographically) strong passwords.
+If the
+device given does not exists or is not a character device, glibc's <CODE
+CLASS="FUNCTION"
+>random()</CODE
+> will be used instead. </P
+></LI
+><LI
+STYLE="list-style-type: opencircle"
+><P
+><TT
+CLASS="LITERAL"
+>--with-authdir</TT
+> Default authentication directory. If not given, <TT
+CLASS="LITERAL"
+>/etc/sotp</TT
+> will be used</P
+></LI
+><LI
+STYLE="list-style-type: opencircle"
+><P
+><TT
+CLASS="LITERAL"
+>--enable-debug</TT
+> Verbose logging with syslog</P
+></LI
+></UL
+>&#13;</P
+><P
+>pam_sotp requires a <TT
+CLASS="LITERAL"
+>shadow</TT
+> system group to work. This group will own all the authentication
+databases and directories in the system. Most linux installations already have this group, so you don't have to worry
+about this. If you don't have a <TT
+CLASS="LITERAL"
+>shadow</TT
+> group, (<TT
+CLASS="LITERAL"
+>configure</TT
+> script will complain about
+it) try to create it by hand. Also contact me so I can figure out some fix for the next release.</P
+></DIV
+><DIV
+CLASS="SECT1"
+><HR><H2
+CLASS="SECT1"
+><A
+NAME="AEN41"
+>3. Configuration</A
+></H2
+><DIV
+CLASS="SECT2"
+><H3
+CLASS="SECT2"
+><A
+NAME="AEN43"
+>3.1. Creating a new authentication database</A
+></H3
+><P
+>pam_sotp stores authentication information in <SPAN
+CLASS="emphasis"
+><I
+CLASS="EMPHASIS"
+>authentication databases</I
+></SPAN
+>. Each authentication 
+database contains the information used to authenticate one user. Authentication databases are grouped into authentication
+directories. Each pam_sotp-enabled PAM service will authenticate against an authentication directory (by default 
+<TT
+CLASS="LITERAL"
+>/etc/sotp</TT
+>, but this can be changed for each service). If the user to be authenticated doesn't 
+have an authentication database under the inspected authentication directory, pam_sotp refuses to authenticate
+him/her, giving control back to the PAM module stack.</P
+><P
+>The support utilities for pam_sotp have been merged into one utility: <B
+CLASS="COMMAND"
+>otppasswd</B
+>. Once you
+have installed pam_sotp all you have to do to create a new authentication databasefor your user is to run the 
+<B
+CLASS="COMMAND"
+>otppasswd</B
+>
+command. <B
+CLASS="COMMAND"
+>otppasswd</B
+> usage is straightforward:
+
+<PRE
+CLASS="SYNOPSIS"
+>$ otppasswd -h
+otppasswd v.0.3.3  (C) 2004 Pedro Diaz (sotp@cavecanen.org)
+
+Usage: otppasswd [OPTIONS]
+
+Available options:
+
+  -o file           File used to store the OTP list
+  -n number         Number of passwords to generate (default: 20)
+  -p prefix         Prefix to add in each generated password (default: No prefix)
+  -l length         Length of each generated password (default: 5)
+  -t lifespan       Built-in password lifespan, in seconds (default: 0)
+  -e days           Make the auth database expire in x days (default: don't expire)
+  -c charset        Charset used when generating passwords (default: 0123456789)
+  -d authdir        Authentication directory (default: /etc/sotp/)
+  -P                Pretty-print the OTP list
+  -D                Disable the auth database
+  -E                Enable the auth database
+  -h                Show this help message</PRE
+></P
+><P
+>If the options <B
+CLASS="COMMAND"
+>-D</B
+> or <B
+CLASS="COMMAND"
+>-E</B
+> are not specified, <B
+CLASS="COMMAND"
+>otppasswd</B
+> will 
+create a new authentication database overwriting  any previous database that the user might have in the
+authentication directory. This means that you can use <B
+CLASS="COMMAND"
+>otppasswd</B
+> to generate a new
+OTP list when you are near to run out of passwords. Keep in mind that since <B
+CLASS="COMMAND"
+>otppasswd</B
+>
+overwrites the previous database your previous OTP list won't be valid anymore.</P
+><P
+>The option <B
+CLASS="COMMAND"
+>-D</B
+> disables an existing authentication database. The authentication data will still be
+there but pam_sotp will refuse to use it. The option <B
+CLASS="COMMAND"
+>-E</B
+> enables a previously disabled database.</P
+></DIV
+><DIV
+CLASS="SECT2"
+><HR><H3
+CLASS="SECT2"
+><A
+NAME="AEN62"
+>3.2. Configuring the pam_sotp module</A
+></H3
+><P
+>The <TT
+CLASS="LITERAL"
+>pam_sotp.so</TT
+> module accepts the following options:</P
+><P
+></P
+><UL
+><LI
+STYLE="list-style-type: opencircle"
+><P
+><TT
+CLASS="LITERAL"
+>auth_dir=<TT
+CLASS="REPLACEABLE"
+><I
+>path</I
+></TT
+></TT
+>  Path to the SOTP authentication directory. If not specified the default
+(specified with the <B
+CLASS="COMMAND"
+>configure</B
+> script when pam_sotp was compiled, or <TT
+CLASS="LITERAL"
+>/etc/sotp</TT
+> if none
+was specified) will be used</P
+></LI
+><LI
+STYLE="list-style-type: opencircle"
+><P
+><TT
+CLASS="LITERAL"
+>fail_delay=<TT
+CLASS="REPLACEABLE"
+><I
+>nsecs</I
+></TT
+></TT
+> Plan a delay of at least <TT
+CLASS="REPLACEABLE"
+><I
+>nsecs</I
+></TT
+> seconds after a 
+failed authentication. The actual number of seconds of waiting depends on PAM and the module stack. The default for this option
+is zero seconds.</P
+></LI
+><LI
+STYLE="list-style-type: opencircle"
+><P
+><TT
+CLASS="LITERAL"
+>prompt_number=<TT
+CLASS="REPLACEABLE"
+><I
+>&lt;yes|no&gt;</I
+></TT
+></TT
+> Include the password number in the prompt. The default
+for this option is to include the password number in the prompt.</P
+></LI
+><LI
+STYLE="list-style-type: opencircle"
+><P
+><TT
+CLASS="LITERAL"
+>pw_lifespan=<TT
+CLASS="REPLACEABLE"
+><I
+>nsecs</I
+></TT
+></TT
+> Set the password lifespan value for this service. The default
+for this option is cero seconds.</P
+></LI
+></UL
+><DIV
+CLASS="SECT3"
+><HR><H4
+CLASS="SECT3"
+><A
+NAME="AEN86"
+>3.2.1. Example</A
+></H4
+><P
+>We want to configure the login service with SOTP support. We
+also want to let in other non-SOTP users. SOTP users must also be able to
+log-in with their regular password.</P
+><P
+>The file <TT
+CLASS="LITERAL"
+>/etc/pam.d/login</TT
+> will look something like this:
+<PRE
+CLASS="SYNOPSIS"
+>auth sufficient pam_sotp.so prompt_number=yes 
+account required        pam_unix.so</PRE
+></P
+><P
+>SOTP users (the ones with an auth database in <TT
+CLASS="LITERAL"
+>/etc/sotp</TT
+>) will be asked
+for an OTP. If the OTP is wrong they will be asked for their regular
+password:
+<PRE
+CLASS="SCREEN"
+>	odiel:~# telnet localhost
+	Trying 127.0.0.1...
+	Connected to localhost.localdomain.
+	Escape character is '^]'.
+	Debian GNU/Linux 3.1 odiel
+	odiel login: susan
+
+	One time password [01]: <A
+NAME="OTPPASSWD"
+><IMG
+SRC="callout.gif"
+HSPACE="0"
+VSPACE="0"
+BORDER="0"
+ALT="(1)"></A
+>
+	Password:</PRE
+>
+
+<DIV
+CLASS="CALLOUTLIST"
+><DL
+COMPACT="COMPACT"
+><DT
+><A
+HREF="#OTPPASSWD"
+><IMG
+SRC="callout.gif"
+HSPACE="0"
+VSPACE="0"
+BORDER="0"
+ALT="(1)"></A
+></DT
+><DD
+>The wrong OTP was introduced</DD
+></DL
+></DIV
+></P
+><P
+>Non-SOTP users won't notice difference:
+<PRE
+CLASS="SCREEN"
+>	odiel:~# telnet localhost
+	Trying 127.0.0.1...
+
+	Connected to localhost.localdomain.
+	Escape character is '^]'.
+	Debian GNU/Linux 3.1 odiel
+	odiel login: pdiaz
+	Password:</PRE
+></P
+></DIV
+></DIV
+><DIV
+CLASS="SECT2"
+><HR><H3
+CLASS="SECT2"
+><A
+NAME="AEN101"
+>3.3. Other issues</A
+></H3
+><DIV
+CLASS="SECT3"
+><H4
+CLASS="SECT3"
+><A
+NAME="AEN103"
+>3.3.1. Password lifespan</A
+></H4
+><P
+>With the options <TT
+CLASS="LITERAL"
+>pw_lifespan</TT
+> in the module configuration and
+<TT
+CLASS="LITERAL"
+>-t </TT
+> in <B
+CLASS="COMMAND"
+>otppasswd</B
+>
+ you can configure pam_sotp to authenticate a service with 
+<SPAN
+CLASS="emphasis"
+><I
+CLASS="EMPHASIS"
+>limited time passwords</I
+></SPAN
+>. This basically means that pam_sotp will handle authentication in the
+same way as before but with the following additional feature: an used password will remain valid for some time 
+after its first use. Of course, the prompted password will be also valid.</P
+><P
+>The actual amount of time an older password will remain valid is calculated as the minimum of the value specified in 
+<TT
+CLASS="LITERAL"
+>/etc/pam.d/service</TT
+> configuration file and the value specified with <B
+CLASS="COMMAND"
+>otppasswd</B
+> 
+when the user database was created.
+This means that specifying a value of zero in either of these places will disable password lifespan for that pam service or
+authentication database.</P
+><P
+>Limited Time Passwords are useful for using pam_sotp with software that requires several authentications against a service
+in a short period of time, such as some webmail systems (<A
+HREF="http://www.squirrelmail.org/"
+TARGET="_top"
+>Squirrelmail</A
+> 
+has this behavior).</P
+></DIV
+></DIV
+></DIV
+><DIV
+CLASS="SECT1"
+><HR><H2
+CLASS="SECT1"
+><A
+NAME="AEN115"
+>4. Disclaimer, contact information, etc...</A
+></H2
+><P
+>pam_sotp is <SPAN
+CLASS="emphasis"
+><I
+CLASS="EMPHASIS"
+>not</I
+></SPAN
+> yet ready
+for production use. This is alpha-quality code, it may be full of remote
+holes (I hope not ;-). Having said that, I've been using pam_sotp for
+accessing my webmail for some time and I didn't found any problems.</P
+><P
+>This is my first PAM module. I've done my best to comply with the
+standards recommended by the PAM Module Writers' Manual. If you have
+experience writing PAM modules and you have any suggestions about the
+code, please contact me!</P
+><P
+>Suggestions, patches and code contributions can be directed to
+<CODE
+CLASS="EMAIL"
+>&#60;<A
+HREF="mailto:sotp (AT) cavecanen.org"
+>sotp (AT) cavecanen.org</A
+>&#62;</CODE
+>. They will be very welcome.</P
+></DIV
+></DIV
+></BODY
+></HTML
+>
